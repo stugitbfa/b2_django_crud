@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Post
 # Create your views here.
 # def index(request):
@@ -6,6 +6,7 @@ from .models import Post
 
 
 def show(request):
+    # posts = Post.objects.all().order_by('-id')[:2]
     posts = Post.objects.all()
     context = {
         'posts':posts
@@ -26,3 +27,26 @@ def insert(request):
         new_post.save()
 
     return render(request, 'dashboard/insert.html')
+
+def update_post(request, post_id):
+    update_data = Post.objects.get(id=post_id)
+    if request.method == 'POST':
+        if request.FILES:
+            update_data.image = request.FILES['post_image']
+
+        update_data.title = request.POST['title']
+        update_data.content = request.POST['content']
+        update_data.save()
+        return redirect('show')
+
+    context = {
+        'post': update_data
+    }
+    return render(request, 'dashboard/update.html', context)
+
+def delete_post(request, post_id):
+    delete_post = Post.objects.get(id=post_id)
+    delete_post.delete()
+    return redirect('show')
+
+
